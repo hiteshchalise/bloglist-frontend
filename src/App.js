@@ -96,6 +96,10 @@ const App = () => {
     }
   }
 
+  const removeBlog = (blog) => {
+    updateBlogs(blogs.filter(blogItem => blogItem.id !== blog.id))
+  }
+
   const loginForm = () => (
     <div>
       <h2>log in to application</h2>
@@ -132,7 +136,7 @@ const App = () => {
       <br />
       {
         blogs.map(blog =>
-          <Blog key={blog.id} blog={blog} handleLikeClick={handleLikeClick} />
+          <Blog key={blog.id} blog={blog} handleLikeClick={handleLikeClick} removeBlog={removeBlog} />
         )
       }
     </div>

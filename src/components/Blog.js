@@ -9,7 +9,7 @@ const blogStyle = {
   paddingBottom: 2,
 }
 
-const Blog = ({ blog, handleLikeClick }) => {
+const Blog = ({ blog, handleLikeClick, removeBlog }) => {
 
   const [show, setShow] = useState(false)
 
@@ -22,6 +22,11 @@ const Blog = ({ blog, handleLikeClick }) => {
     })
   }
 
+  const handleRemoveBlog = () => {
+    const remove = window.confirm(`Remove blog '${blog.title}' by ${blog.author}`)
+    if (remove) removeBlog(blog)
+  }
+
   return (
     <div style={blogStyle}>
       {blog.title} {blog.author} <button onClick={changeShowState} >{show ? 'hide' : 'show'}</button>
@@ -29,6 +34,7 @@ const Blog = ({ blog, handleLikeClick }) => {
         <div>{blog.url}</div>
         <div>likes {blog.likes}<button onClick={handleLikeButton}>like</button></div>
         <div> {blog.user.name}</div>
+        <div><button onClick={handleRemoveBlog} >Remove</button></div>
       </div>
     </div>
   )
