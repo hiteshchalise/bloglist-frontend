@@ -66,6 +66,29 @@ const App = () => {
     }
   }
 
+  const removeUserState = () => {
+    window.localStorage.removeItem('loggedBlogUser')
+    setMessage('Logged out', false)
+    blogService.setToken('')
+    setUser(null)
+  }
+
+  const handleLikeClick = async (blogToBeUpdated) => {
+    try {
+      const response = await blogService.updateBlog(blogToBeUpdated)
+      setBlogs(blogs.map(blog => response.id === blog.id ? response : blog))
+      setMessage('Liked a blog', false)
+    } catch (exception) {
+      console.log(exception)
+      if (exception.response.status === 401) {
+        removeUserState()
+        setMessage('Token expired, Please login again', true)
+      }
+      const error = exception.response.data.error
+      setMessage(error ? error : 'invalid data', true)
+    }
+  }
+
   const loginForm = () => (
     <div>
       <h2>log in to application</h2>
@@ -96,20 +119,13 @@ const App = () => {
     <div>
       <h2>blogs</h2>
       <div>
-        {user.name} logged in <button onClick={() => {
-          window.localStorage.removeItem('loggedBlogUser')
-          setMessage('Logged out', false)
-          blogService.setToken('')
-          setUser(null)
-        }}>logout</button>
+        {user.name} logged in <button onClick={removeUserState}>logout</button>
       </div>
       <Togglable toggleName="create new blog" ref={blogToggleRef}><BlogForm createNewBlog={createNewBlog} /></Togglable>
       <br />
       {
         blogs.map(blog =>
-          <div>
-            <Blog key={blog.id} blog={blog} />
-          </div>
+          <Blog key={blog.id} blog={blog} handleLikeClick={handleLikeClick} />
         )
       }
     </div>
