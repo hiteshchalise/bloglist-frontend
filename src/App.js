@@ -16,7 +16,7 @@ const App = () => {
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
-      setBlogs(blogs)
+      updateBlogs(blogs)
     )
   }, [])
 
@@ -28,6 +28,13 @@ const App = () => {
       setUser(parsedUser)
     }
   }, [])
+
+  const updateBlogs = (blogs) => {
+    const sortedBlogsBylikes = blogs
+      .concat([])
+      .sort((a, b) => a.likes < b.likes ? 1 : a.likes === b.likes ? 0 : -1)
+    setBlogs(sortedBlogsBylikes)
+  }
 
   const setMessage = (message, error = false) => {
     setNotification({ message, error })
@@ -57,7 +64,7 @@ const App = () => {
     try {
       const response = await blogService.createBlog({ title, author, url })
       setMessage(`A new blog "${title}" by ${author} added.`)
-      setBlogs(blogs.concat(response))
+      updateBlogs(blogs.concat(response))
       blogToggleRef.current.toggleVisibility()
     } catch (exception) {
       console.log('exception: ', exception)
@@ -76,7 +83,7 @@ const App = () => {
   const handleLikeClick = async (blogToBeUpdated) => {
     try {
       const response = await blogService.updateBlog(blogToBeUpdated)
-      setBlogs(blogs.map(blog => response.id === blog.id ? response : blog))
+      updateBlogs(blogs.map(blog => response.id === blog.id ? response : blog))
       setMessage('Liked a blog', false)
     } catch (exception) {
       console.log(exception)
