@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/loginService'
+import { BlogForm } from './components/BlogForm'
+import { Togglable } from './components/Togglable'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -10,9 +12,7 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [notification, setNotification] = useState({ message: '', error: false })
-  const [title, setTitle] = useState('')
-  const [author, setAuthor] = useState('')
-  const [url, setUrl] = useState('')
+  const blogToggleRef = useRef()
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -31,7 +31,7 @@ const App = () => {
 
   const setMessage = (message, error = false) => {
     setNotification({ message, error })
-    setTimeout(() => setNotification({ message: '', error: false }), 5000)
+    setTimeout(() => setNotification({ message: '', error: false }), 3000)
   }
 
   const handleLogin = async (event) => {
@@ -48,17 +48,17 @@ const App = () => {
       setPassword('')
     } catch (exception) {
       console.log(exception)
-      setMessage('wrong credentials', true)
+      if (exception.response.status === 401) setMessage('Wrong Credentials', true)
+      else setMessage('Some error occured.', true)
     }
   }
 
-  const handleNewBlogSubmit = async (event) => {
-    event.preventDefault()
-    console.log('adding a new blog with: ', title, author, url)
+  const createNewBlog = async (title, author, url) => {
     try {
       const response = await blogService.createBlog({ title, author, url })
       setMessage(`A new blog "${title}" by ${author} added.`)
       setBlogs(blogs.concat(response))
+      blogToggleRef.current.toggleVisibility()
     } catch (exception) {
       console.log('exception: ', exception)
       const error = exception.response.data.error
@@ -103,35 +103,13 @@ const App = () => {
           setUser(null)
         }}>logout</button>
       </div>
-      <h2>create new</h2>
-      <form onSubmit={handleNewBlogSubmit}>
-        <div>title:
-          <input
-            type="text"
-            value={title}
-            name="title"
-            onChange={(event) => setTitle(event.target.value)} />
-        </div>
-        <div>author:
-          <input
-            type="text"
-            value={author}
-            name="author"
-            onChange={(event) => setAuthor(event.target.value)} />
-        </div>
-        <div>url:
-          <input
-            type="text"
-            value={url}
-            name="url"
-            onChange={(event) => setUrl(event.target.value)} />
-        </div>
-        <button type='submit'>create</button>
-      </form>
+      <Togglable toggleName="create new blog" ref={blogToggleRef}><BlogForm createNewBlog={createNewBlog} /></Togglable>
       <br />
       {
         blogs.map(blog =>
-          <Blog key={blog.id} blog={blog} />
+          <div>
+            <Blog key={blog.id} blog={blog} />
+          </div>
         )
       }
     </div>
