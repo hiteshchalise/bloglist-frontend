@@ -35,4 +35,4 @@ const blogService = {
   updateBlog
 }
 
-export default blogService 
+export default blogService
