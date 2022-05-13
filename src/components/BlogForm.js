@@ -19,22 +19,28 @@ export const BlogForm = ({ createNewBlog }) => {
 
       <h2>create new</h2>
       <form onSubmit={handleNewBlogSubmit}>
-        <div>title:
+        <div>
+          <label htmlFor='title'> title:</label>
           <input
+            id='title'
             type="text"
             value={title}
             name="title"
             onChange={(event) => setTitle(event.target.value)} />
         </div>
-        <div>author:
+        <div>
+          <label htmlFor='author'>author: </label>
           <input
+            id='author'
             type="text"
             value={author}
             name="author"
             onChange={(event) => setAuthor(event.target.value)} />
         </div>
-        <div>url:
+        <div>
+          <label htmlFor='url'>url: </label>
           <input
+            id='url'
             type="text"
             value={url}
             name="url"
