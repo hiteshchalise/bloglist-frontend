@@ -52,16 +52,26 @@ describe('Blog app', function () {
       it('a blog can be created', function () {
         const title = 'a new blog'
         const author = 'author'
-        cy.contains('create new blog').click()
-        cy.get('#title').type(title)
-        cy.get('#author').type(author)
-        cy.get('#url').type('www.authorurl.com')
-        cy.get('#blog-submit-button').click()
+        const url = 'www.author.com'
+        cy.createBlog({ title, author, url })
         cy.get('.notification')
           .should('contain', `A new blog "${title}" by ${author} added.`)
         cy.get('.blog-list')
           .should('have.length', 1)
           .contains(title)
+      })
+
+      describe('a blog is added', function () {
+        beforeEach(function () {
+          cy.createBlog({ title: 'new', author: 'foo', url: 'www.bar.com' })
+        })
+
+        it('a blog can be liked', function () {
+          cy.contains('show').click()
+          cy.get('button').contains('like').click()
+          cy.get('.notification')
+            .should('contain', 'Liked a blog')
+        })
       })
     })
   })

@@ -8,4 +8,10 @@ Cypress.Commands.add('login', (credentials) => {
 
 })
 
-
+Cypress.Commands.add('createBlog', ({ title, author, url }) => {
+  cy.contains('create new blog').click()
+  cy.get('#title').type(title)
+  cy.get('#author').type(author)
+  cy.get('#url').type(url)
+  cy.get('#blog-submit-button').click()
+})
