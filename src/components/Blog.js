@@ -28,7 +28,7 @@ const Blog = ({ blog, handleLikeClick, removeBlog }) => {
   }
 
   return (
-    <div style={blogStyle}>
+    <div className='blog-item' style={blogStyle}>
       {blog.title} {blog.author} <button onClick={changeShowState} >{show ? 'hide' : 'show'}</button>
       <div style={activatedWhenShow}>
         <div>{blog.url}</div>

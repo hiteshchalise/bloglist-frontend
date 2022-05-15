@@ -14,7 +14,6 @@ describe('Blog app', function () {
 
   describe('Login', function () {
     beforeEach(function () {
-      cy.request('POST', 'http://localhost:3003/api/testing/reset')
       const user = {
         name: 'User Name',
         username: 'Username',
@@ -63,7 +62,7 @@ describe('Blog app', function () {
 
       describe('a blog is added', function () {
         beforeEach(function () {
-          cy.createBlog({ title: 'new', author: 'foo', url: 'www.bar.com' })
+          cy.createBlog({ title: 'A very new title', author: 'foo', url: 'www.bar.com' })
         })
 
         it('a blog can be liked', function () {
@@ -71,6 +70,43 @@ describe('Blog app', function () {
           cy.get('button').contains('like').click()
           cy.get('.notification')
             .should('contain', 'Liked a blog')
+        })
+
+        it('a blog can be deleted by user that created it', function () {
+          cy.contains('show').click()
+          cy.log(window.localStorage.getItem('loggedBlogUser'))
+          cy.get('button').contains('Remove').click()
+          cy.get('.blog-item').should('not.exist')
+        })
+
+
+        it('a blog cannot be deleted by other users', function () {
+          const newUser = {
+            name: 'New User',
+            username: 'NewUsername',
+            password: 'NewPassword'
+          }
+
+          cy.request('POST', 'http://localhost:3003/api/users', newUser)
+          cy.visit('http://localhost:3000')
+          cy.login({ username: newUser.username, password: newUser.password })
+          cy.contains('show').click()
+          cy.get('button').contains('Remove').click()
+          cy.get('.blog-item').should('exist')
+        })
+
+        it('blogs are ordered based on likes', function () {
+          cy.createBlog({ title: 'Blog 2', author: 'author', url: 'www.author.com' })
+          cy.createBlog({ title: 'Blog 3', author: 'author', url: 'www.author.com' })
+          cy.wait(2000)
+          // last child is selected and show button is clicked followed by like button.
+          cy.get('.blog-item').eq(2).find('button').contains('show').click()
+          cy.get('.blog-item').eq(2).find('button').contains('like').click()
+          cy.wait(1000)
+          // first child is selected and total like is 1, meaning blog list is
+          // sorted by like count
+          cy.get('.blog-list').children().first().as('first')
+          cy.get('@first').contains('likes 1')
         })
       })
     })

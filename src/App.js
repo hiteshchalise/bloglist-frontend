@@ -96,8 +96,20 @@ const App = () => {
     }
   }
 
-  const removeBlog = (blog) => {
-    updateBlogs(blogs.filter(blogItem => blogItem.id !== blog.id))
+  const removeBlog = async (blog) => {
+    try {
+      await blogService.removeBlog(blog)
+      updateBlogs(blogs.filter(blogItem => blogItem.id !== blog.id))
+      setMessage('Removed a blog')
+    } catch (exception) {
+      console.log(exception)
+      if (exception.response.status === 401) {
+        setMessage('Unauthorized action, cannot remove someone else\'s post')
+      } else if (exception.response.status === 400) {
+        removeUserState()
+        setMessage('Token expired, Please login again')
+      }
+    }
   }
 
   const loginForm = () => (
@@ -129,23 +141,26 @@ const App = () => {
   )
 
   const blogList = () => (
-    <div className='blog-list'>
+    <div className='blog'>
       <h2>blogs</h2>
       <div>
         {user.name} logged in <button onClick={removeUserState}>logout</button>
       </div>
       <Togglable toggleName="create new blog" ref={blogToggleRef}><BlogForm createNewBlog={createNewBlog} /></Togglable>
       <br />
-      {
-        blogs.map(blog =>
-          <Blog key={blog.id} blog={blog} handleLikeClick={handleLikeClick} removeBlog={removeBlog} />
-        )
-      }
+      <div className='blog-list'>
+        {
+          blogs.map(blog =>
+            <Blog key={blog.id} blog={blog} handleLikeClick={handleLikeClick} removeBlog={removeBlog} />
+          )
+        }
+      </div>
+
     </div>
   )
 
   return (
-    <div className='blog'>
+    <div>
       <Notification message={notification.message} error={notification.error} />
       {user === null ? loginForm() : blogList()}
     </div>
